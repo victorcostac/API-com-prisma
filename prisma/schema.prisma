@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model empresas {
+  id            Int     @id @default(autoincrement())
+  nome_fantasia String
+  razao_social  String
+  cnpj          String  @unique
+  ativo         Boolean @default(true)
+  usuarios    usuarios[]
+  formas_pgto formaspgto[]
+  produtos    produtos[]
+  parcelas    parcelas[]
+  pedidos     pedidos[]
+  tabela_pv   tabelas_pv[]
+  imagens     imagens[]
+  clientes    clientes[]
+  
+}
+
+model usuarios {
+  id             Int     @id @default(autoincrement())
+  id_empresa     Int
+  codigo_usuario Int
+  nome_usuario   String
+  mac_auth       String
+  email          String  @unique
+  ativo          Boolean @default(true)
+  clientes clientes[]
+  pedidos  pedidos[]
+  empresa  empresas   @relation(fields: [id_empresa], references: [id])
+  
+}
+
+model clientes {
+  id                Int      @id @default(autoincrement())
+  id_empresa        Int
+  id_usuario        Int
+  codigo_cliente    String?
+  razao_social      String?
+  nome_fantasia     String
+  cnpj              Int?     @unique
+  IE                Int?
+  segmento          String?
+  email_empresarial String?
+  endereco          String?
+  bairro            String?
+  cidade            String?
+  cep               String?
+  uf                String?
+  numero            String?
+  telefone          String?
+  whatsapp          String?
+  contator          String?
+  resp_empresa      String?
+  email             String?  @unique
+  observacao        String?
+  bloqueado         Boolean  @default(false)
+  ultima_alteracao  DateTime
+  pedidos  pedidos[]
+  empresa  empresas  @relation(fields: [id_empresa], references: [id])
+  usuarios usuarios  @relation(fields: [id_usuario], references: [id])
+  
+}
+
+model formaspgto {
+  id                Int    @id @default(autoincrement())
+  id_empresa        Int
+  codigo_formaspgto Int
+  descricao         String
+  empresa empresas  @relation(fields: [id_empresa], references: [id])
+  pedidos pedidos[]
+  
+}
+
+model parcelas {
+  id              Int    @id @default(autoincrement())
+  id_empresa      Int
+  codigo_parcelas Int
+  descricao       String //30-60-90,7-14-28
+  empresa empresas  @relation(fields: [id_empresa], references: [id])
+  pedidos pedidos[]
+  
+}
+
+model status_pedido {
+  id        Int       @id @default(autoincrement())
+  descricao String
+  pedidos   pedidos[]
+  
+}
+
+model tipo_pedido {
+  id        Int       @id @default(autoincrement())
+  descricao String
+  pedidos   pedidos[]
+  
+}
+
+model pedidos {
+  id               Int      @id @default(autoincrement())
+  id_empresa       Int
+  id_usuario       Int
+  id_cliente       Int
+  id_formapgto     Int //Dinheiro,cheque,Cartao,Boleto
+  id_parcela       Int //30-60-90,7-14-28
+  id_tabela_pv     Int
+  datahora         DateTime
+  id_tipo_pedido   Int //Orçamento ou Pedido
+  id_status        Int
+  total_pedido     Decimal  
+  total_desconto   Decimal  
+  ultima_alteracao DateTime
+  pedidos_produtos pedidos_produtos[]
+  empresa          empresas           @relation(fields: [id_empresa], references: [id])
+  usuario          usuarios           @relation(fields: [id_usuario], references: [id])
+  cliente          clientes           @relation(fields: [id_cliente], references: [id])
+  formapgto        formaspgto         @relation(fields: [id_formapgto], references: [id])
+  parcela          parcelas           @relation(fields: [id_parcela], references: [id])
+  tabela_pv        tabelas_pv         @relation(fields: [id_tabela_pv], references: [id])
+  tipo_pedido      tipo_pedido        @relation(fields: [id_tipo_pedido], references: [id])
+  status           status_pedido      @relation(fields: [id_status], references: [id])
+  
+}
+
+model tabelas_pv {
+  id               Int      @id @default(autoincrement())
+  id_empresa       Int
+  id_produto       Int
+  tipo_tab         String //Tabela A, B
+  valor_nominal    Decimal  
+  desc_valor       Decimal  
+  ultima_alteracao DateTime
+  empresa empresas  @relation(fields: [id_empresa], references: [id])
+  pedidos pedidos[]
+  
+}
+
+model imagens {
+  id               Int      @id @default(autoincrement())
+  id_empresa       Int
+  id_produto       Int
+  imagem           Bytes
+  ultima_alteracao DateTime
+  empresa empresas @relation(fields: [id_empresa], references: [id])
+  produto produtos @relation(fields: [id_produto], references: [id])
+  
+}
+
+model produtos {
+  id               Int      @id @default(autoincrement())
+  id_empresa       Int
+  codigo_produto   Int
+  descricao        String
+  referencia       String
+  marca            String
+  estoque          Decimal  
+  ultima_alteracao DateTime
+  pedidos_produtos pedidos_produtos[]
+  imagens          imagens[]
+  empresa          empresas           @relation(fields: [id_empresa], references: [id])
+  
+}
+
+model pedidos_produtos {
+  id               Int      @id @default(autoincrement())
+  id_pedido        Int
+  id_produto       Int
+  qtde             Decimal  
+  valor_nominal    Decimal  
+  desc_valor       Decimal  
+  total_liquido    Decimal  
+  ultima_alteracao DateTime
+  pedido  pedidos  @relation(fields: [id_pedido], references: [id])
+  produto produtos @relation(fields: [id_produto], references: [id])
+  
+}
