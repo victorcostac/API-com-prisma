@@ -7,7 +7,7 @@ export class CreateUserController {
   async handle(req: Request, res: Response) {
     const { name, email, id_empresa } = req.body;
 
-    const usuario_existe = await prisma.u ({
+    const usuario_existe = await prisma.user.findUnique({
 
       where: {
         email
@@ -19,18 +19,13 @@ export class CreateUserController {
       return res.status(404).json("user already exists");
     }
     
-    const user = await prisma.usuarios.create({
-      
+    const user = await prisma.user.create({
 
       data:{
         name,
         email
-        
-
-
       }
     });
-
 
     return res.status(201).json(user);
   }

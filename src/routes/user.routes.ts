@@ -13,6 +13,6 @@ const userRoutes = Router();
 
 userRoutes.post("/user", createUserController.handle);
 // userRoutes.get("/", getAllUsersController.handle);
-userRoutes.get("/users", getaAllUsersController.handle);
+userRoutes.get("/getuser", getaAllUsersController.handle);
 
 export { userRoutes };
